@@ -1,0 +1,129 @@
+# ============================================
+# BACKEND (Kotlin/Gradle/Spring Boot)
+# ============================================
+# Gradle
+**/.gradle/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+HELP.md
+
+# STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+**/bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# IntelliJ IDEA
+*.iws
+*.iml
+*.ipr
+**/out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# NetBeans
+**/nbproject/private/
+**/nbbuild/
+**/dist/
+**/nbdist/
+**/.nb-gradle/
+
+# Kotlin
+.kotlin/
+**/.kotlin/
+
+# ============================================
+# FRONTEND (Node/SvelteKit)
+# ============================================
+# Dependencies
+**/node_modules/
+node_modules/
+
+# Build outputs
+**/.svelte-kit/
+**/build/
+**/.output/
+**/dist/
+
+# Deployment
+.vercel/
+.netlify/
+.wrangler/
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Package managers
+.pnpm-store/
+.yarn/
+.npm/
+
+# ============================================
+# SHARED / GLOBAL
+# ============================================
+# IDEs
+.idea/
+**/.idea/
+.vscode/
+**/.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.test
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.test
+
+# Logs
+*.log
+**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+**/coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+**/*.tmp
+**/*.temp
+
+# Docker
+.dockerignore
+
+# Claude Desktop
+.claude/
+*.claude.md
+.claude-cache/
+
+# Gemini/Google AI
+.gemini/
+.ai-cache/
+
+.copilot/
+.github/copilot/
