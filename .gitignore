@@ -110,17 +110,13 @@ coverage/
 **/*.tmp
 **/*.temp
 
-# Docker
-.dockerignore
-
-# Claude Desktop
+# Claude Desktop & Claude Code
 .claude/
-*.claude.md
 .claude-cache/
+*CLAUDE.md
+.claude/settings.local.json
 
-# Gemini/Google AI
+# Gemini CLI
 .gemini/
+.geminiignore
 .ai-cache/
-
-.copilot/
-.github/copilot/
