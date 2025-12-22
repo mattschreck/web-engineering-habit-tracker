@@ -12,9 +12,11 @@ A SvelteKit application built with Svelte 5 and Bun.
 ## Local Development
 
 ### Prerequisites
+
 - Bun installed on the host system.
 
 ### Commands
+
 ```bash
 # Install dependencies
 bun install
@@ -27,5 +29,6 @@ bun run format
 ```
 
 ## Integration
+
 - API Client: The application communicates with the Spring Boot backend via a centralized client located in src/lib/api/client.ts.
 - Environment: Uses dynamic environment variables for the API URL to support different deployment environments.

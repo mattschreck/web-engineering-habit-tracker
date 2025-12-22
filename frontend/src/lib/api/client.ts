@@ -109,15 +109,12 @@ class ApiError extends Error {
 	}
 }
 
-async function fetchApi<T>(
-	endpoint: string,
-	options: RequestInit = {}
-): Promise<T> {
+async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const url = `${API_BASE_URL}${endpoint}`;
 
 	const headers: HeadersInit = {
 		'Content-Type': 'application/json',
-		...options.headers,
+		...options.headers
 	};
 
 	// Add JWT token if available
@@ -128,7 +125,7 @@ async function fetchApi<T>(
 
 	const response = await fetch(url, {
 		...options,
-		headers,
+		headers
 	});
 
 	// Handle error responses
@@ -140,11 +137,7 @@ async function fetchApi<T>(
 			// If JSON parsing fails, create basic error
 		}
 
-		throw new ApiError(
-			response.status,
-			errorDetails?.message || response.statusText,
-			errorDetails
-		);
+		throw new ApiError(response.status, errorDetails?.message || response.statusText, errorDetails);
 	}
 
 	// Handle empty responses (204 No Content)
@@ -162,7 +155,7 @@ async function fetchApi<T>(
 export async function register(data: RegisterRequest): Promise<AuthResponse> {
 	const response = await fetchApi<AuthResponse>('/api/auth/register', {
 		method: 'POST',
-		body: JSON.stringify(data),
+		body: JSON.stringify(data)
 	});
 
 	// Store token after successful registration
@@ -174,7 +167,7 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
 export async function login(data: LoginRequest): Promise<AuthResponse> {
 	const response = await fetchApi<AuthResponse>('/api/auth/login', {
 		method: 'POST',
-		body: JSON.stringify(data),
+		body: JSON.stringify(data)
 	});
 
 	// Store token after successful login
@@ -198,13 +191,13 @@ export async function getCurrentUser(): Promise<UserResponse> {
 export async function updateCurrentUser(data: Partial<UserResponse>): Promise<UserResponse> {
 	return fetchApi<UserResponse>('/api/users/me', {
 		method: 'PUT',
-		body: JSON.stringify(data),
+		body: JSON.stringify(data)
 	});
 }
 
 export async function deleteCurrentUser(): Promise<void> {
 	await fetchApi<void>('/api/users/me', {
-		method: 'DELETE',
+		method: 'DELETE'
 	});
 	clearToken();
 }
@@ -221,23 +214,28 @@ export async function getHabit(id: number): Promise<HabitResponse> {
 	return fetchApi<HabitResponse>(`/api/habits/${id}`);
 }
 
-export async function createHabit(data: Omit<HabitResponse, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<HabitResponse> {
+export async function createHabit(
+	data: Omit<HabitResponse, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+): Promise<HabitResponse> {
 	return fetchApi<HabitResponse>('/api/habits', {
 		method: 'POST',
-		body: JSON.stringify(data),
+		body: JSON.stringify(data)
 	});
 }
 
-export async function updateHabit(id: number, data: Partial<HabitResponse>): Promise<HabitResponse> {
+export async function updateHabit(
+	id: number,
+	data: Partial<HabitResponse>
+): Promise<HabitResponse> {
 	return fetchApi<HabitResponse>(`/api/habits/${id}`, {
 		method: 'PUT',
-		body: JSON.stringify(data),
+		body: JSON.stringify(data)
 	});
 }
 
 export async function deleteHabit(id: number): Promise<void> {
 	return fetchApi<void>(`/api/habits/${id}`, {
-		method: 'DELETE',
+		method: 'DELETE'
 	});
 }
 
@@ -253,23 +251,30 @@ export async function getHabitLog(habitId: number, logId: number): Promise<Habit
 	return fetchApi<HabitLogResponse>(`/api/habits/${habitId}/logs/${logId}`);
 }
 
-export async function createHabitLog(habitId: number, data: Omit<HabitLogResponse, 'id' | 'habitId' | 'createdAt' | 'updatedAt'>): Promise<HabitLogResponse> {
+export async function createHabitLog(
+	habitId: number,
+	data: Omit<HabitLogResponse, 'id' | 'habitId' | 'createdAt' | 'updatedAt'>
+): Promise<HabitLogResponse> {
 	return fetchApi<HabitLogResponse>(`/api/habits/${habitId}/logs`, {
 		method: 'POST',
-		body: JSON.stringify(data),
+		body: JSON.stringify(data)
 	});
 }
 
-export async function updateHabitLog(habitId: number, logId: number, data: Partial<HabitLogResponse>): Promise<HabitLogResponse> {
+export async function updateHabitLog(
+	habitId: number,
+	logId: number,
+	data: Partial<HabitLogResponse>
+): Promise<HabitLogResponse> {
 	return fetchApi<HabitLogResponse>(`/api/habits/${habitId}/logs/${logId}`, {
 		method: 'PUT',
-		body: JSON.stringify(data),
+		body: JSON.stringify(data)
 	});
 }
 
 export async function deleteHabitLog(habitId: number, logId: number): Promise<void> {
 	return fetchApi<void>(`/api/habits/${habitId}/logs/${logId}`, {
-		method: 'DELETE',
+		method: 'DELETE'
 	});
 }
 

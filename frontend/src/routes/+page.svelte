@@ -14,6 +14,6 @@
 </script>
 
 <!-- Loading state while redirecting -->
-<div class="min-h-screen bg-black flex items-center justify-center">
-	<div class="text-white text-lg">Redirecting...</div>
+<div class="flex min-h-screen items-center justify-center bg-black">
+	<div class="text-lg text-white">Redirecting...</div>
 </div>

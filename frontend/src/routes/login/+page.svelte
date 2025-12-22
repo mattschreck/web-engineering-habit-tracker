@@ -54,7 +54,7 @@
 </svelte:head>
 
 <!-- Black background container -->
-<div class="min-h-screen w-full bg-black flex items-center justify-center p-4">
+<div class="flex min-h-screen w-full items-center justify-center bg-black p-4">
 	<!-- Login Card -->
 	<Card.Root class="w-full max-w-md">
 		<Card.Header>
@@ -97,7 +97,7 @@
 
 					<!-- Error Message -->
 					{#if error}
-						<div class="text-sm text-red-500 bg-red-50 dark:bg-red-950/20 p-3 rounded-md">
+						<div class="rounded-md bg-red-50 p-3 text-sm text-red-500 dark:bg-red-950/20">
 							{error}
 						</div>
 					{/if}
@@ -112,9 +112,7 @@
 
 			<div class="text-center text-sm text-muted-foreground">
 				Don't have an account?
-				<a href="/register" class="text-primary underline-offset-4 hover:underline">
-					Sign up
-				</a>
+				<a href="/register" class="text-primary underline-offset-4 hover:underline"> Sign up </a>
 			</div>
 		</Card.Footer>
 	</Card.Root>

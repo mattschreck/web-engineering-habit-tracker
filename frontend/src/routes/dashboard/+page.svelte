@@ -38,19 +38,19 @@
 
 <div class="min-h-screen bg-background">
 	{#if loading}
-		<div class="flex items-center justify-center min-h-screen">
+		<div class="flex min-h-screen items-center justify-center">
 			<div class="text-lg">Loading...</div>
 		</div>
 	{:else if user}
 		<!-- Header -->
 		<header class="border-b">
-			<div class="container mx-auto px-4 py-4 flex items-center justify-between">
+			<div class="container mx-auto flex items-center justify-between px-4 py-4">
 				<h1 class="text-2xl font-bold">Habit Tracker</h1>
 				<div class="flex items-center gap-4">
 					<span class="text-sm text-muted-foreground">Welcome, {user.username}!</span>
 					<button
 						onclick={handleLogout}
-						class="text-sm text-primary hover:underline underline-offset-4"
+						class="text-sm text-primary underline-offset-4 hover:underline"
 					>
 						Logout
 					</button>
@@ -63,12 +63,12 @@
 			<div class="space-y-6">
 				<div>
 					<h2 class="text-3xl font-bold">Dashboard</h2>
-					<p class="text-muted-foreground mt-2">Welcome to your habit tracking dashboard!</p>
+					<p class="mt-2 text-muted-foreground">Welcome to your habit tracking dashboard!</p>
 				</div>
 
 				<!-- User Info Card -->
-				<div class="border rounded-lg p-6 space-y-2">
-					<h3 class="font-semibold text-lg">Your Profile</h3>
+				<div class="space-y-2 rounded-lg border p-6">
+					<h3 class="text-lg font-semibold">Your Profile</h3>
 					<div class="grid gap-2 text-sm">
 						<div class="flex justify-between">
 							<span class="text-muted-foreground">Username:</span>
@@ -90,8 +90,8 @@
 				</div>
 
 				<!-- Placeholder for future habit content -->
-				<div class="border border-dashed rounded-lg p-12 text-center">
-					<h3 class="text-xl font-semibold mb-2">Your Habits</h3>
+				<div class="rounded-lg border border-dashed p-12 text-center">
+					<h3 class="mb-2 text-xl font-semibold">Your Habits</h3>
 					<p class="text-muted-foreground">Habit tracking functionality coming soon!</p>
 				</div>
 			</div>
