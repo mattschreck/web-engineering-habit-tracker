@@ -117,6 +117,5 @@ coverage/
 .claude/settings.local.json
 
 # Gemini CLI
-.gemini/
-.geminiignore
-.ai-cache/
+*GEMINI.md
+#GEMINI.md

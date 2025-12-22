@@ -1,38 +1,31 @@
-# sv
+# Habit Tracker Frontend
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A SvelteKit application built with Svelte 5 and Bun.
 
-## Creating a project
+## Core Technologies
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Framework: SvelteKit (using Svelte 5 Runes)
+- Package Manager: Bun
+- Styling: Tailwind CSS v4
+- Components: Shadcn-Svelte
 
-```sh
-# create a new project in the current directory
-npx sv create
+## Local Development
 
-# create a new project in my-app
-npx sv create my-app
+### Prerequisites
+- Bun installed on the host system.
+
+### Commands
+```bash
+# Install dependencies
+bun install
+
+# Start development server
+bun run dev
+
+# Format code
+bun run format
 ```
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Integration
+- API Client: The application communicates with the Spring Boot backend via a centralized client located in src/lib/api/client.ts.
+- Environment: Uses dynamic environment variables for the API URL to support different deployment environments.
