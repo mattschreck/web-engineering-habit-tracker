@@ -5,6 +5,8 @@
 	import * as Card from '$lib/components/ui/card';
 	import { register, type RegisterRequest, ApiError } from '$lib/api/client';
 	import { goto } from '$app/navigation';
+	import ThemeToggle from '$lib/components/theme-toggle.svelte';
+	import { BackgroundBeams } from '$lib/components/ui/background-beams';
 
 	let username = $state('');
 	let email = $state('');
@@ -13,7 +15,7 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 
-	async function handleRegister(event?: SubmitEvent) {
+	async function handleRegister(event?: Event) {
 		event?.preventDefault();
 		error = null;
 
@@ -69,14 +71,36 @@
 	<title>Register - Habit Tracker</title>
 </svelte:head>
 
-<!-- Black background container -->
-<div class="flex min-h-screen w-full items-center justify-center bg-black p-4">
-	<!-- Register Card -->
-	<Card.Root class="w-full max-w-md">
-		<Card.Header>
-			<Card.Title class="text-2xl">Create an account</Card.Title>
-			<Card.Description>Enter your information to get started</Card.Description>
-		</Card.Header>
+<div class="relative min-h-screen overflow-hidden bg-background">
+	<BackgroundBeams />
+
+	<!-- Navigation -->
+	<nav class="relative z-10 border-b border-border">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="flex h-16 items-center justify-between">
+				<a href="/" class="flex items-center">
+					<h1 class="text-2xl font-bold text-primary hover:opacity-80 transition-opacity">
+						Habit Tracker
+					</h1>
+				</a>
+				<div class="flex items-center gap-4">
+					<Button variant="outline" href="/login">Login</Button>
+					<ThemeToggle />
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Register Card Container -->
+	<div class="relative z-10 flex min-h-[calc(100vh-4rem)] w-full items-center justify-center p-4">
+		<Card.Root class="-my-4 w-full max-w-sm">
+			<Card.Header>
+				<Card.Title>Create an account</Card.Title>
+				<Card.Description>Enter your information to get started</Card.Description>
+				<Card.Action>
+					<Button variant="link" href="/login">Login</Button>
+				</Card.Action>
+			</Card.Header>
 
 		<Card.Content>
 			<form onsubmit={handleRegister}>
@@ -147,15 +171,11 @@
 			</form>
 		</Card.Content>
 
-		<Card.Footer class="flex flex-col gap-3">
-			<Button type="submit" class="w-full" disabled={loading}>
+		<Card.Footer class="flex-col gap-2">
+			<Button type="button" onclick={handleRegister} class="w-full" disabled={loading}>
 				{loading ? 'Creating account...' : 'Create account'}
 			</Button>
-
-			<div class="text-center text-sm text-muted-foreground">
-				Already have an account?
-				<a href="/login" class="text-primary underline-offset-4 hover:underline"> Login </a>
-			</div>
 		</Card.Footer>
-	</Card.Root>
+		</Card.Root>
+	</div>
 </div>
