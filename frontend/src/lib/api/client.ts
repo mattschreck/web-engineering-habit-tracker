@@ -48,32 +48,52 @@ export interface ErrorResponse {
 	validationErrors?: Record<string, string>;
 }
 
+export type HabitFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM';
+
 export interface HabitResponse {
 	id: number;
 	name: string;
 	description: string | null;
-	frequency: string;
-	targetCount: number | null;
+	active: boolean;
+	frequency: HabitFrequency;
+	startDate: string | null;
+	endDate: string | null;
 	userId: number;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface HabitRequest {
+	name: string;
+	description?: string | null;
+	active?: boolean;
+	frequency: HabitFrequency;
+	startDate?: string | null;
+	endDate?: string | null;
 }
 
 export interface HabitLogResponse {
 	id: number;
 	habitId: number;
 	logDate: string;
-	count: number;
-	note: string | null;
+	completed: boolean;
+	notes: string | null;
 	createdAt: string;
-	updatedAt: string;
+}
+
+export interface HabitLogRequest {
+	habitId: number;
+	logDate: string;
+	completed: boolean;
+	notes?: string | null;
 }
 
 // ============================================
-// Token Management
+// Token & User Management
 // ============================================
 
 const TOKEN_KEY = 'jwt_token';
+const USER_KEY = 'current_user';
 
 export function getToken(): string | null {
 	if (!browser) return null;
@@ -90,8 +110,24 @@ export function clearToken(): void {
 	localStorage.removeItem(TOKEN_KEY);
 }
 
+export function getCurrentUserFromStorage(): UserResponse | null {
+	if (!browser) return null;
+	const user = localStorage.getItem(USER_KEY);
+	return user ? JSON.parse(user) : null;
+}
+
+export function setCurrentUser(user: UserResponse): void {
+	if (!browser) return;
+	localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+export function clearCurrentUser(): void {
+	if (!browser) return;
+	localStorage.removeItem(USER_KEY);
+}
+
 export function isAuthenticated(): boolean {
-	return getToken() !== null;
+	return getToken() !== null && getCurrentUserFromStorage() !== null;
 }
 
 // ============================================
@@ -158,8 +194,9 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
 		body: JSON.stringify(data)
 	});
 
-	// Store token after successful registration
+	// Store token and user after successful registration
 	setToken(response.token);
+	setCurrentUser(response.user);
 
 	return response;
 }
@@ -170,14 +207,16 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
 		body: JSON.stringify(data)
 	});
 
-	// Store token after successful login
+	// Store token and user after successful login
 	setToken(response.token);
+	setCurrentUser(response.user);
 
 	return response;
 }
 
 export function logout(): void {
 	clearToken();
+	clearCurrentUser();
 }
 
 // ============================================
@@ -200,6 +239,7 @@ export async function deleteCurrentUser(): Promise<void> {
 		method: 'DELETE'
 	});
 	clearToken();
+	clearCurrentUser();
 }
 
 // ============================================
@@ -207,29 +247,40 @@ export async function deleteCurrentUser(): Promise<void> {
 // ============================================
 
 export async function getHabits(): Promise<HabitResponse[]> {
-	return fetchApi<HabitResponse[]>('/api/habits');
+	const user = getCurrentUserFromStorage();
+	if (!user) throw new Error('User not authenticated');
+	return fetchApi<HabitResponse[]>(`/api/habits?userId=${user.id}`);
+}
+
+export async function getActiveHabits(): Promise<HabitResponse[]> {
+	const user = getCurrentUserFromStorage();
+	if (!user) throw new Error('User not authenticated');
+	return fetchApi<HabitResponse[]>(`/api/habits/active?userId=${user.id}`);
 }
 
 export async function getHabit(id: number): Promise<HabitResponse> {
 	return fetchApi<HabitResponse>(`/api/habits/${id}`);
 }
 
-export async function createHabit(
-	data: Omit<HabitResponse, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
-): Promise<HabitResponse> {
-	return fetchApi<HabitResponse>('/api/habits', {
+export async function createHabit(data: HabitRequest): Promise<HabitResponse> {
+	const user = getCurrentUserFromStorage();
+	if (!user) throw new Error('User not authenticated');
+	return fetchApi<HabitResponse>(`/api/habits?userId=${user.id}`, {
 		method: 'POST',
 		body: JSON.stringify(data)
 	});
 }
 
-export async function updateHabit(
-	id: number,
-	data: Partial<HabitResponse>
-): Promise<HabitResponse> {
+export async function updateHabit(id: number, data: HabitRequest): Promise<HabitResponse> {
 	return fetchApi<HabitResponse>(`/api/habits/${id}`, {
 		method: 'PUT',
 		body: JSON.stringify(data)
+	});
+}
+
+export async function toggleHabit(id: number): Promise<HabitResponse> {
+	return fetchApi<HabitResponse>(`/api/habits/${id}/toggle`, {
+		method: 'PATCH'
 	});
 }
 
@@ -244,36 +295,42 @@ export async function deleteHabit(id: number): Promise<void> {
 // ============================================
 
 export async function getHabitLogs(habitId: number): Promise<HabitLogResponse[]> {
-	return fetchApi<HabitLogResponse[]>(`/api/habits/${habitId}/logs`);
+	return fetchApi<HabitLogResponse[]>(`/api/habit-logs?habitId=${habitId}`);
 }
 
-export async function getHabitLog(habitId: number, logId: number): Promise<HabitLogResponse> {
-	return fetchApi<HabitLogResponse>(`/api/habits/${habitId}/logs/${logId}`);
-}
-
-export async function createHabitLog(
+export async function getHabitLogsInRange(
 	habitId: number,
-	data: Omit<HabitLogResponse, 'id' | 'habitId' | 'createdAt' | 'updatedAt'>
-): Promise<HabitLogResponse> {
-	return fetchApi<HabitLogResponse>(`/api/habits/${habitId}/logs`, {
+	startDate: string,
+	endDate: string
+): Promise<HabitLogResponse[]> {
+	return fetchApi<HabitLogResponse[]>(
+		`/api/habit-logs/range?habitId=${habitId}&startDate=${startDate}&endDate=${endDate}`
+	);
+}
+
+export async function getHabitLog(logId: number): Promise<HabitLogResponse> {
+	return fetchApi<HabitLogResponse>(`/api/habit-logs/${logId}`);
+}
+
+export async function createHabitLog(data: HabitLogRequest): Promise<HabitLogResponse> {
+	return fetchApi<HabitLogResponse>('/api/habit-logs', {
 		method: 'POST',
 		body: JSON.stringify(data)
 	});
 }
 
 export async function updateHabitLog(
-	habitId: number,
 	logId: number,
-	data: Partial<HabitLogResponse>
+	data: Partial<HabitLogRequest>
 ): Promise<HabitLogResponse> {
-	return fetchApi<HabitLogResponse>(`/api/habits/${habitId}/logs/${logId}`, {
+	return fetchApi<HabitLogResponse>(`/api/habit-logs/${logId}`, {
 		method: 'PUT',
 		body: JSON.stringify(data)
 	});
 }
 
-export async function deleteHabitLog(habitId: number, logId: number): Promise<void> {
-	return fetchApi<void>(`/api/habits/${habitId}/logs/${logId}`, {
+export async function deleteHabitLog(logId: number): Promise<void> {
+	return fetchApi<void>(`/api/habit-logs/${logId}`, {
 		method: 'DELETE'
 	});
 }

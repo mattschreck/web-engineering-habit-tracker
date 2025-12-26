@@ -4,6 +4,7 @@ import com.example.habittracker.entity.Habit
 import com.example.habittracker.entity.HabitFrequency
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class HabitRequest(
@@ -16,7 +17,11 @@ data class HabitRequest(
 
     val active: Boolean = true,
 
-    val frequency: HabitFrequency = HabitFrequency.DAILY
+    val frequency: HabitFrequency = HabitFrequency.DAILY,
+
+    val startDate: LocalDate? = null,
+
+    val endDate: LocalDate? = null
 )
 
 data class HabitResponse(
@@ -25,6 +30,8 @@ data class HabitResponse(
     val description: String?,
     val active: Boolean,
     val frequency: HabitFrequency,
+    val startDate: LocalDate?,
+    val endDate: LocalDate?,
     val userId: Long,
     val createdAt: LocalDateTime?,
     val updatedAt: LocalDateTime?
@@ -37,6 +44,8 @@ data class HabitResponse(
                 description = habit.description,
                 active = habit.active,
                 frequency = habit.frequency,
+                startDate = habit.startDate,
+                endDate = habit.endDate,
                 userId = habit.user.id!!,
                 createdAt = habit.createdAt,
                 updatedAt = habit.updatedAt

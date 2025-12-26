@@ -79,7 +79,7 @@
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
 				<a href="/" class="flex items-center">
-					<h1 class="text-2xl font-bold text-primary hover:opacity-80 transition-opacity">
+					<h1 class="text-2xl font-bold text-primary transition-opacity hover:opacity-80">
 						Habit Tracker
 					</h1>
 				</a>
@@ -102,80 +102,84 @@
 				</Card.Action>
 			</Card.Header>
 
-		<Card.Content>
-			<form onsubmit={handleRegister}>
-				<div class="flex flex-col gap-4">
-					<!-- Username Input -->
-					<div class="grid gap-2">
-						<Label for="username">Username</Label>
-						<Input
-							id="username"
-							type="text"
-							placeholder="john_doe"
-							bind:value={username}
-							onkeypress={handleKeyPress}
-							required
-							disabled={loading}
-						/>
-					</div>
-
-					<!-- Email Input -->
-					<div class="grid gap-2">
-						<Label for="email">Email</Label>
-						<Input
-							id="email"
-							type="email"
-							placeholder="john@example.com"
-							bind:value={email}
-							onkeypress={handleKeyPress}
-							required
-							disabled={loading}
-						/>
-					</div>
-
-					<!-- Password Input -->
-					<div class="grid gap-2">
-						<Label for="password">Password</Label>
-						<Input
-							id="password"
-							type="password"
-							placeholder="Minimum 8 characters"
-							bind:value={password}
-							onkeypress={handleKeyPress}
-							required
-							disabled={loading}
-						/>
-					</div>
-
-					<!-- Confirm Password Input -->
-					<div class="grid gap-2">
-						<Label for="confirmPassword">Confirm Password</Label>
-						<Input
-							id="confirmPassword"
-							type="password"
-							placeholder="Re-enter your password"
-							bind:value={confirmPassword}
-							onkeypress={handleKeyPress}
-							required
-							disabled={loading}
-						/>
-					</div>
-
-					<!-- Error Message -->
-					{#if error}
-						<div class="rounded-md bg-red-50 p-3 text-sm text-red-500 dark:bg-red-950/20">
-							{error}
+			<Card.Content>
+				<form onsubmit={handleRegister}>
+					<div class="flex flex-col gap-4">
+						<!-- Username Input -->
+						<div class="grid gap-2">
+							<Label for="username">Username</Label>
+							<Input
+								id="username"
+								type="text"
+								placeholder="john_doe"
+								bind:value={username}
+								onkeypress={handleKeyPress}
+								autocomplete="username"
+								required
+								disabled={loading}
+							/>
 						</div>
-					{/if}
-				</div>
-			</form>
-		</Card.Content>
 
-		<Card.Footer class="flex-col gap-2">
-			<Button type="button" onclick={handleRegister} class="w-full" disabled={loading}>
-				{loading ? 'Creating account...' : 'Create account'}
-			</Button>
-		</Card.Footer>
+						<!-- Email Input -->
+						<div class="grid gap-2">
+							<Label for="email">Email</Label>
+							<Input
+								id="email"
+								type="email"
+								placeholder="john@example.com"
+								bind:value={email}
+								onkeypress={handleKeyPress}
+								autocomplete="email"
+								required
+								disabled={loading}
+							/>
+						</div>
+
+						<!-- Password Input -->
+						<div class="grid gap-2">
+							<Label for="password">Password</Label>
+							<Input
+								id="password"
+								type="password"
+								placeholder="Minimum 8 characters"
+								bind:value={password}
+								onkeypress={handleKeyPress}
+								autocomplete="new-password"
+								required
+								disabled={loading}
+							/>
+						</div>
+
+						<!-- Confirm Password Input -->
+						<div class="grid gap-2">
+							<Label for="confirmPassword">Confirm Password</Label>
+							<Input
+								id="confirmPassword"
+								type="password"
+								placeholder="Re-enter your password"
+								bind:value={confirmPassword}
+								onkeypress={handleKeyPress}
+								autocomplete="new-password"
+								required
+								disabled={loading}
+							/>
+						</div>
+
+						<!-- Error Message -->
+						{#if error}
+							<div class="rounded-md bg-red-50 p-3 text-sm text-red-500 dark:bg-red-950/20">
+								{error}
+							</div>
+						{/if}
+					</div>
+				</form>
+			</Card.Content>
+
+			<Card.Footer class="flex-col gap-2">
+				<Button type="button" onclick={handleRegister} class="w-full" disabled={loading}>
+					{loading ? 'Creating account...' : 'Create account'}
+				</Button>
+			</Card.Footer>
 		</Card.Root>
 	</div>
 </div>

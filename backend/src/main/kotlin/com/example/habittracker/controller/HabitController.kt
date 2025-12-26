@@ -94,6 +94,8 @@ class HabitController(
             description = request.description,
             active = request.active,
             frequency = request.frequency,
+            startDate = request.startDate,
+            endDate = request.endDate,
             user = user
         )
 
@@ -121,7 +123,9 @@ class HabitController(
             name = request.name,
             description = request.description,
             active = request.active,
-            frequency = request.frequency
+            frequency = request.frequency,
+            startDate = request.startDate,
+            endDate = request.endDate
         )
 
         val savedHabit = habitService.update(id, updatedHabit)

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -29,6 +30,12 @@ data class Habit(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val frequency: HabitFrequency = HabitFrequency.DAILY,
+
+    @Column(name = "start_date")
+    val startDate: LocalDate? = null,
+
+    @Column(name = "end_date")
+    val endDate: LocalDate? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
