@@ -5,8 +5,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import * as Select from '$lib/components/ui/select';
-	import { formatFrequency } from '$lib/utils/habit-progress';
 
 	let {
 		open = $bindable(false),
@@ -23,31 +21,46 @@
 	let frequency: HabitFrequency = $state('DAILY');
 	let startDate = $state('');
 	let endDate = $state('');
+	let hasEndDate = $state(false);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 
 	let isEdit = $derived(habit !== null);
-	let dialogTitle = $derived(isEdit ? 'Edit Habit' : 'Create New Habit');
-	let submitButtonText = $derived(isEdit ? 'Update' : 'Create');
+	let dialogTitle = $derived(isEdit ? 'Habit bearbeiten' : 'Neues Habit');
+	let submitButtonText = $derived(isEdit ? 'Aktualisieren' : 'Erstellen');
 
-	// Initialize form when habit changes
+	// Heutiges Datum (YYYY-MM-DD)
+	function getTodayDate(): string {
+		const today = new Date();
+		return today.toISOString().split('T')[0];
+	}
+
+	// Formular initialisieren/zurücksetzen
 	$effect(() => {
-		if (habit) {
-			name = habit.name;
-			description = habit.description || '';
-			frequency = habit.frequency;
-			startDate = habit.startDate || '';
-			endDate = habit.endDate || '';
-		} else {
-			name = '';
-			description = '';
-			frequency = 'DAILY';
-			startDate = '';
-			endDate = '';
+		// Reagiert auf Änderungen von `open` und `habit`
+		if (open) {
+			if (habit) {
+				// Bearbeiten: Werte vom Habit laden
+				name = habit.name;
+				description = habit.description || '';
+				frequency = habit.frequency;
+				startDate = habit.startDate || '';
+				endDate = habit.endDate || '';
+				hasEndDate = !!habit.endDate;
+			} else {
+				// Neu erstellen: Formular zurücksetzen
+				name = '';
+				description = '';
+				frequency = 'DAILY';
+				startDate = getTodayDate();
+				endDate = '';
+				hasEndDate = false;
+			}
+			error = null;
 		}
-		error = null;
 	});
 
+	// Formular absenden
 	async function handleSubmit(event?: Event) {
 		event?.preventDefault();
 		error = null;
@@ -59,7 +72,7 @@
 				description: description.trim() || null,
 				frequency,
 				startDate: startDate || null,
-				endDate: endDate || null,
+				endDate: hasEndDate ? (endDate || null) : null,
 				active: true
 			};
 
@@ -75,7 +88,7 @@
 			if (err instanceof ApiError) {
 				error = err.error;
 			} else {
-				error = 'An unexpected error occurred';
+				error = 'Ein unerwarteter Fehler ist aufgetreten';
 			}
 		} finally {
 			loading = false;
@@ -93,18 +106,19 @@
 		<Dialog.Header>
 			<Dialog.Title>{dialogTitle}</Dialog.Title>
 			<Dialog.Description>
-				{isEdit ? 'Update your habit details.' : 'Create a new habit to track.'}
+				{isEdit ? 'Habit-Details anpassen.' : 'Neues Habit zum Verfolgen erstellen.'}
 			</Dialog.Description>
 		</Dialog.Header>
 
 		<form onsubmit={handleSubmit} class="space-y-4">
-			<!-- Name Input -->
+			<!-- Name -->
 			<div class="grid gap-2">
 				<Label for="name">Name *</Label>
 				<Input
 					id="name"
+					name="habit-name"
 					type="text"
-					placeholder="E.g., Morning Exercise"
+					placeholder="z.B. Morgen-Workout"
 					bind:value={name}
 					autocomplete="off"
 					required
@@ -113,13 +127,14 @@
 				/>
 			</div>
 
-			<!-- Description Input -->
+			<!-- Beschreibung -->
 			<div class="grid gap-2">
-				<Label for="description">Description</Label>
+				<Label for="description">Beschreibung</Label>
 				<Input
 					id="description"
+					name="habit-description"
 					type="text"
-					placeholder="Optional description"
+					placeholder="Optional"
 					bind:value={description}
 					autocomplete="off"
 					disabled={loading}
@@ -129,51 +144,65 @@
 
 			<!-- Frequency Select -->
 			<div class="grid gap-2">
-				<Label for="frequency">Frequency *</Label>
-				<Select.Root
-					selected={{ value: frequency, label: formatFrequency(frequency) }}
-					onSelectedChange={(v: any) => {
-						if (v) frequency = v.value as HabitFrequency;
-					}}
+				<Label for="frequency">Frequenz *</Label>
+				<select
+					id="frequency"
+					bind:value={frequency}
+					disabled={loading}
+					required
+					class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
 				>
-					<Select.Trigger id="frequency" disabled={loading}>
-						<Select.Value placeholder="Select frequency" />
-					</Select.Trigger>
-					<Select.Content>
-						<Select.Item value="DAILY">Daily</Select.Item>
-						<Select.Item value="WEEKLY">Weekly</Select.Item>
-						<Select.Item value="MONTHLY">Monthly</Select.Item>
-					</Select.Content>
-				</Select.Root>
+					<option value="DAILY">Täglich</option>
+					<option value="WEEKLY">Wöchentlich</option>
+					<option value="MONTHLY">Monatlich</option>
+				</select>
 			</div>
 
-			<!-- Start Date Input -->
+			<!-- Startdatum -->
 			<div class="grid gap-2">
-				<Label for="startDate">Start Date</Label>
+				<Label for="startDate">Startdatum *</Label>
 				<Input
 					id="startDate"
 					type="date"
 					bind:value={startDate}
 					autocomplete="off"
 					disabled={loading}
+					min={getTodayDate()}
+					required
 				/>
 			</div>
 
-			<!-- End Date Input -->
+			<!-- Enddatum Checkbox -->
 			<div class="grid gap-2">
-				<Label for="endDate">End Date</Label>
-				<Input
-					id="endDate"
-					type="date"
-					bind:value={endDate}
-					autocomplete="off"
-					disabled={loading}
-					min={startDate || undefined}
-				/>
-				<p class="text-xs text-muted-foreground">
-					Leave empty for unlimited duration
-				</p>
+				<div class="flex items-center gap-2">
+					<input
+						id="hasEndDate"
+						type="checkbox"
+						bind:checked={hasEndDate}
+						disabled={loading}
+						class="h-4 w-4 rounded border-input"
+					/>
+					<Label for="hasEndDate" class="cursor-pointer font-normal">
+						Enddatum setzen
+					</Label>
+				</div>
 			</div>
+
+			<!-- Enddatum (nur wenn aktiviert) -->
+			{#if hasEndDate}
+				<div class="grid gap-2">
+					<Label for="endDate">Enddatum *</Label>
+					<Input
+						id="endDate"
+						type="date"
+						bind:value={endDate}
+						autocomplete="off"
+						disabled={loading}
+						min={startDate || undefined}
+						required
+					/>
+				</div>
+			{/if}
 
 			<!-- Error Message -->
 			{#if error}
@@ -182,13 +211,13 @@
 				</div>
 			{/if}
 
-			<!-- Action Buttons -->
+			<!-- Aktionen -->
 			<Dialog.Footer>
 				<Button type="button" variant="outline" onclick={handleCancel} disabled={loading}>
-					Cancel
+					Abbrechen
 				</Button>
 				<Button type="submit" disabled={loading || !name.trim()}>
-					{loading ? 'Saving...' : submitButtonText}
+					{loading ? 'Speichern...' : submitButtonText}
 				</Button>
 			</Dialog.Footer>
 		</form>

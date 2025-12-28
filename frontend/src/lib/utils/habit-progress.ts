@@ -1,81 +1,79 @@
 import type { HabitFrequency, HabitLogResponse } from '$lib/api/client';
 
-/**
- * Calculate habit completion progress based on logs
- * @param frequency - DAILY (last 7 days) or WEEKLY (last 4 weeks)
- * @param logs - Array of habit logs
- * @returns Progress percentage (0-100)
- */
-export function calculateHabitProgress(
-	frequency: HabitFrequency,
-	logs: HabitLogResponse[]
-): number {
-	const today = new Date();
-	today.setHours(0, 0, 0, 0);
+// Heutiges Datum im lokalen Zeitzone-Format (YYYY-MM-DD)
+export function getLocalDateString(date: Date = new Date()): string {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+}
 
-	let daysToCheck: number;
-	switch (frequency) {
-		case 'DAILY':
-			daysToCheck = 7; // Last 7 days
-			break;
-		case 'WEEKLY':
-			daysToCheck = 28; // Last 4 weeks (28 days)
-			break;
-		case 'MONTHLY':
-			daysToCheck = 90; // Last 3 months (90 days)
-			break;
-		default:
-			daysToCheck = 7; // Default to weekly
-	}
+// Frequenz-Text formatieren (Enum → Lesbar)
+export function formatFrequency(frequency: HabitFrequency): string {
+	const translations = {
+		DAILY: 'Täglich',
+		WEEKLY: 'Wöchentlich',
+		MONTHLY: 'Monatlich',
+		CUSTOM: 'Benutzerdefiniert'
+	};
+	return translations[frequency] || frequency;
+}
 
-	// Generate array of dates to check
-	const datesToCheck: string[] = [];
-	for (let i = 0; i < daysToCheck; i++) {
-		const date = new Date(today);
-		date.setDate(date.getDate() - i);
-		datesToCheck.push(date.toISOString().split('T')[0]);
-	}
+// Aktuelle Streak berechnen (aufeinanderfolgende Tage)
+export function calculateCurrentStreak(logs: HabitLogResponse[]): number {
+	if (logs.length === 0) return 0;
 
-	// Count completed logs
+	// Nur abgeschlossene Logs als Set speichern (schnelles Lookup)
 	const completedDates = new Set(
 		logs.filter((log) => log.completed).map((log) => log.logDate.split('T')[0])
 	);
 
-	const completedCount = datesToCheck.filter((date) => completedDates.has(date)).length;
+	if (completedDates.size === 0) return 0;
 
-	return Math.round((completedCount / daysToCheck) * 100);
+	let streak = 0;
+	let currentDate = new Date();
+
+	// Von heute rückwärts zählen
+	while (streak < 1000) {
+		const dateStr = getLocalDateString(currentDate);
+		if (completedDates.has(dateStr)) {
+			streak++;
+			currentDate.setDate(currentDate.getDate() - 1);
+		} else {
+			break; // Streak unterbrochen
+		}
+	}
+
+	return streak;
 }
 
-/**
- * Get the number of days/periods to display for a given frequency
- */
-export function getFrequencyPeriodText(frequency: HabitFrequency): string {
+// Erwartete Gesamtanzahl basierend auf Zeitraum (null = unbegrenzt)
+export function calculateTotalExpected(
+	frequency: HabitFrequency,
+	startDate: string | null,
+	endDate: string | null
+): number | null {
+	if (!endDate) return null; // Unbegrenzt
+
+	const start = startDate ? new Date(startDate) : new Date();
+	const end = new Date(endDate);
+	const daysDiff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
 	switch (frequency) {
 		case 'DAILY':
-			return 'Last 7 days';
+			return daysDiff;
 		case 'WEEKLY':
-			return 'Last 4 weeks';
+			return Math.ceil(daysDiff / 7);
 		case 'MONTHLY':
-			return 'Last 3 months';
+			const monthsDiff =
+				(end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+			return monthsDiff;
 		default:
-			return 'Progress';
+			return daysDiff;
 	}
 }
 
-/**
- * Format frequency enum to human-readable text
- */
-export function formatFrequency(frequency: HabitFrequency): string {
-	switch (frequency) {
-		case 'DAILY':
-			return 'Daily';
-		case 'WEEKLY':
-			return 'Weekly';
-		case 'MONTHLY':
-			return 'Monthly';
-		case 'CUSTOM':
-			return 'Custom';
-		default:
-			return frequency;
-	}
+// Anzahl erledigter Logs
+export function calculateTotalCompleted(logs: HabitLogResponse[]): number {
+	return logs.filter((log) => log.completed).length;
 }

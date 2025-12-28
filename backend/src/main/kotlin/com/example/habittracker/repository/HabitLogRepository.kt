@@ -11,11 +11,16 @@ import java.util.*
 @Repository
 interface HabitLogRepository : JpaRepository<HabitLog, Long> {
     fun findByHabit(habit: Habit): List<HabitLog>
+
+    @Query("SELECT hl FROM HabitLog hl JOIN FETCH hl.habit WHERE hl.habit.id = :habitId")
     fun findByHabitId(habitId: Long): List<HabitLog>
+
     fun findByHabitIdAndLogDate(habitId: Long, logDate: LocalDate): Optional<HabitLog>
+
+    @Query("SELECT hl FROM HabitLog hl JOIN FETCH hl.habit WHERE hl.habit.id = :habitId AND hl.logDate BETWEEN :startDate AND :endDate")
     fun findByHabitIdAndLogDateBetween(habitId: Long, startDate: LocalDate, endDate: LocalDate): List<HabitLog>
 
-    @Query("SELECT hl FROM HabitLog hl WHERE hl.habit.user.id = :userId AND hl.logDate BETWEEN :startDate AND :endDate")
+    @Query("SELECT hl FROM HabitLog hl JOIN FETCH hl.habit WHERE hl.habit.user.id = :userId AND hl.logDate BETWEEN :startDate AND :endDate")
     fun findByUserIdAndDateRange(userId: Long, startDate: LocalDate, endDate: LocalDate): List<HabitLog>
 
     fun existsByHabitIdAndLogDate(habitId: Long, logDate: LocalDate): Boolean

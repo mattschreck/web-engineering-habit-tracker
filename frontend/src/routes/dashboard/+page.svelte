@@ -9,6 +9,7 @@
 		deleteHabit,
 		ApiError
 	} from '$lib/api/client';
+	import { getLocalDateString } from '$lib/utils/habit-progress';
 	import HabitCard from '$lib/components/habit-card.svelte';
 	import AddHabitCard from '$lib/components/add-habit-card.svelte';
 	import HabitDialog from '$lib/components/habit-dialog.svelte';
@@ -32,19 +33,20 @@
 		loadHabits();
 	});
 
+	// Habits und Logs laden
 	async function loadHabits() {
 		try {
 			loading = true;
 			error = null;
 			habits = await getHabits();
 
-			// Load logs for each habit (last 90 days to cover all frequencies)
+			// Logs der letzten 90 Tage laden (für alle Frequenzen)
 			const today = new Date();
 			const ninetyDaysAgo = new Date(today);
 			ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
-			const endDate = today.toISOString().split('T')[0];
-			const startDate = ninetyDaysAgo.toISOString().split('T')[0];
+			const endDate = getLocalDateString(today);
+			const startDate = getLocalDateString(ninetyDaysAgo);
 
 			const logsMap = new Map<number, HabitLogResponse[]>();
 			for (const habit of habits) {
@@ -60,7 +62,7 @@
 			if (err instanceof ApiError) {
 				error = err.error;
 			} else {
-				error = 'Failed to load habits';
+				error = 'Fehler beim Laden der Habits';
 			}
 		} finally {
 			loading = false;
@@ -77,9 +79,10 @@
 		showDialog = true;
 	}
 
+	// Habit löschen
 	async function handleDeleteClick(habit: HabitResponse) {
 		const confirmed = confirm(
-			`Are you sure you want to delete "${habit.name}"? This will also delete all associated logs. This action cannot be undone.`
+			`"${habit.name}" wirklich löschen? Alle zugehörigen Logs werden ebenfalls gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.`
 		);
 
 		if (!confirmed) return;
@@ -91,9 +94,9 @@
 			if (err instanceof ApiError) {
 				error = err.error;
 			} else {
-				error = 'Failed to delete habit';
+				error = 'Fehler beim Löschen des Habits';
 			}
-			alert(`Error: ${error}`);
+			alert(`Fehler: ${error}`);
 		}
 	}
 
@@ -112,16 +115,16 @@
 	<div class="relative z-10 min-h-screen">
 		<Navigation />
 
-		<!-- Main Content -->
+		<!-- Hauptinhalt -->
 		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 			<div class="mb-8">
-				<h1 class="text-3xl font-bold text-foreground">My Habits</h1>
-				<p class="mt-2 text-muted-foreground">Track your progress and build better habits</p>
+				<h1 class="text-3xl font-bold text-foreground">Meine Habits</h1>
+				<p class="mt-2 text-muted-foreground">Verfolge deinen Fortschritt und baue bessere Gewohnheiten auf</p>
 			</div>
 
 			{#if loading}
 				<div class="flex min-h-[100] items-center justify-center">
-					<p class="text-muted-foreground">Loading habits...</p>
+					<p class="text-muted-foreground">Laden...</p>
 				</div>
 			{:else if error}
 				<div class="rounded-md bg-red-50 p-4 text-red-500 dark:bg-red-950/20">
@@ -129,10 +132,10 @@
 				</div>
 			{:else}
 				<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					<!-- Add Habit Card -->
+					<!-- Neues Habit -->
 					<AddHabitCard onClick={handleAddHabit} />
 
-					<!-- Habit Cards -->
+					<!-- Habit-Karten -->
 					{#each habits as habit (habit.id)}
 						<HabitCard
 							{habit}
@@ -147,7 +150,7 @@
 				{#if habits.length === 0}
 					<div class="mt-8 text-center">
 						<p class="text-muted-foreground">
-							No habits yet. Create your first habit to get started!
+							Noch keine Habits. Erstelle dein erstes Habit um loszulegen!
 						</p>
 					</div>
 				{/if}

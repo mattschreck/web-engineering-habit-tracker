@@ -1,11 +1,16 @@
 <script lang="ts">
 	import type { HabitResponse, HabitLogResponse } from '$lib/api/client';
 	import { createHabitLog, updateHabitLog, ApiError } from '$lib/api/client';
-	import { CircularProgress } from '$lib/components/ui/circular-progress';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { Pencil, Trash2, Calendar, CalendarX, Check } from 'lucide-svelte';
-	import { calculateHabitProgress, formatFrequency } from '$lib/utils/habit-progress';
+	import { Pencil, Trash2, Check, Flame } from 'lucide-svelte';
+	import {
+		formatFrequency,
+		calculateCurrentStreak,
+		calculateTotalExpected,
+		calculateTotalCompleted,
+		getLocalDateString
+	} from '$lib/utils/habit-progress';
 
 	interface Props {
 		habit: HabitResponse;
@@ -17,54 +22,52 @@
 
 	let { habit, logs = [], onEdit, onDelete, onCheckIn }: Props = $props();
 
-	let progress = $derived(calculateHabitProgress(habit.frequency, logs));
+	// Berechnete Werte
 	let frequencyText = $derived(formatFrequency(habit.frequency));
+	let currentStreak = $derived(calculateCurrentStreak(logs));
+	let totalExpected = $derived(
+		calculateTotalExpected(habit.frequency, habit.startDate, habit.endDate)
+	);
+	let totalCompleted = $derived(calculateTotalCompleted(logs));
 	let isCheckingIn = $state(false);
 
-	// Check if today is already logged
+	// Heutiges Log suchen
 	let todayLog = $derived.by(() => {
-		const today = new Date().toISOString().split('T')[0];
+		const today = getLocalDateString();
 		return logs.find((log) => log.logDate.split('T')[0] === today);
 	});
 
-	let isCompletedToday = $derived(todayLog?.completed ?? false);
+	let isCompletedToday = $derived(todayLog !== undefined && todayLog.completed === true);
 
-	function formatDate(dateString: string | null): string {
-		if (!dateString) return '';
-		const date = new Date(dateString);
-		return date.toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
-		});
-	}
-
+	// Habit für heute abhaken/umschalten
 	async function handleCheckIn() {
 		isCheckingIn = true;
 		try {
-			const today = new Date().toISOString().split('T')[0];
+			const today = getLocalDateString();
 
 			if (todayLog) {
-				// Update existing log - toggle completion
+				// Bestehendes Log aktualisieren (Toggle)
 				await updateHabitLog(todayLog.id, {
 					habitId: habit.id,
 					logDate: today,
-					completed: !todayLog.completed
+					completed: !todayLog.completed,
+					notes: todayLog.notes || null
 				});
 			} else {
-				// Create new log
+				// Neues Log erstellen
 				await createHabitLog({
 					habitId: habit.id,
 					logDate: today,
-					completed: true
+					completed: true,
+					notes: null
 				});
 			}
 
-			onCheckIn?.();
+			await onCheckIn?.();
 		} catch (error) {
-			console.error('Failed to check in habit:', error);
+			console.error('Check-In fehlgeschlagen:', error);
 			if (error instanceof ApiError) {
-				alert(`Failed to check in: ${error.error}`);
+				alert(`Fehler: ${error.error}`);
 			}
 		} finally {
 			isCheckingIn = false;
@@ -74,57 +77,44 @@
 
 <Card.Root class="w-full">
 	<Card.Header>
-		<div class="flex items-start justify-between">
-			<div class="flex-1">
-				<Card.Title class="text-lg">{habit.name}</Card.Title>
-				{#if habit.description}
-					<Card.Description class="mt-1 text-sm">{habit.description}</Card.Description>
-				{/if}
-			</div>
+		<div class="flex items-center justify-between gap-2">
+			<Card.Title class="text-lg">{habit.name}</Card.Title>
+			<span
+				class="inline-flex items-center rounded-full border border-border bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground"
+			>
+				{frequencyText}
+			</span>
 		</div>
 	</Card.Header>
 
-	<Card.Content class="flex flex-col items-center gap-4">
-		<CircularProgress {progress} size={100} strokeWidth={8} />
-		<div class="w-full space-y-2">
-			<div class="text-center">
-				<p class="text-sm font-medium text-muted-foreground">{frequencyText}</p>
+	<Card.Content class="flex flex-col items-center gap-3 py-6">
+		{#if totalExpected !== null}
+			<!-- Mit Enddatum: Zeige Fortschritt -->
+			<div class="flex items-center gap-2">
+				<span class="text-5xl font-bold">{totalCompleted}</span>
+				<span class="text-3xl text-muted-foreground">/</span>
+				<span class="text-3xl text-muted-foreground">{totalExpected}</span>
 			</div>
-
-			<!-- Start/End Date Information -->
-			{#if habit.startDate || habit.endDate}
-				<div class="flex flex-col gap-1 text-xs text-muted-foreground">
-					{#if habit.startDate}
-						<div class="flex items-center gap-1.5">
-							<Calendar class="h-3.5 w-3.5" />
-							<span>Starts: {formatDate(habit.startDate)}</span>
-						</div>
-					{/if}
-					{#if habit.endDate}
-						<div class="flex items-center gap-1.5">
-							<CalendarX class="h-3.5 w-3.5" />
-							<span>Ends: {formatDate(habit.endDate)}</span>
-						</div>
-					{:else if habit.startDate}
-						<div class="flex items-center gap-1.5">
-							<CalendarX class="h-3.5 w-3.5" />
-							<span>No end date</span>
-						</div>
-					{/if}
-				</div>
-			{/if}
-		</div>
+			<p class="text-sm text-muted-foreground">Erledigt</p>
+		{:else}
+			<!-- Ohne Enddatum: Zeige Streak -->
+			<div class="flex items-center gap-3">
+				<Flame class="h-10 w-10 text-orange-500" />
+				<span class="text-5xl font-bold">{currentStreak}</span>
+			</div>
+			<p class="text-sm text-muted-foreground">Tage hintereinander</p>
+		{/if}
 	</Card.Content>
 
 	<Card.Footer class="flex justify-between gap-2">
 		<div class="flex gap-2">
 			{#if onEdit}
-				<Button variant="outline" size="icon" onclick={onEdit} title="Edit habit">
+				<Button variant="outline" size="icon" onclick={onEdit} title="Bearbeiten">
 					<Pencil class="h-4 w-4" />
 				</Button>
 			{/if}
 			{#if onDelete}
-				<Button variant="outline" size="icon" onclick={onDelete} title="Delete habit">
+				<Button variant="outline" size="icon" onclick={onDelete} title="Löschen">
 					<Trash2 class="h-4 w-4" />
 				</Button>
 			{/if}
@@ -135,10 +125,10 @@
 			variant={isCompletedToday ? 'default' : 'outline'}
 			onclick={handleCheckIn}
 			disabled={isCheckingIn}
-			class="min-w-24"
+			class="min-w-28"
 		>
 			<Check class="mr-2 h-4 w-4" />
-			{isCheckingIn ? 'Saving...' : isCompletedToday ? 'Done' : 'Check In'}
+			{isCheckingIn ? 'Speichern...' : isCompletedToday ? '✓ Erledigt' : 'Abhaken'}
 		</Button>
 	</Card.Footer>
 </Card.Root>
