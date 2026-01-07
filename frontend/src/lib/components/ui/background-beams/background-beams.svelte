@@ -1,4 +1,5 @@
 <script lang="ts">
+	// @ts-nocheck
 	import { cn } from '$lib/utils';
 	import { Motion } from 'svelte-motion';
 

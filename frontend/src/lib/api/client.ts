@@ -148,10 +148,17 @@ class ApiError extends Error {
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const url = `${API_BASE_URL}${endpoint}`;
 
-	const headers: HeadersInit = {
-		'Content-Type': 'application/json',
-		...options.headers
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json'
 	};
+
+	// Merge existing headers
+	if (options.headers) {
+		const existingHeaders = new Headers(options.headers);
+		existingHeaders.forEach((value, key) => {
+			headers[key] = value;
+		});
+	}
 
 	// Add JWT token if available
 	const token = getToken();
