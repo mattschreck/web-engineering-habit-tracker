@@ -22,7 +22,6 @@
 
 	let { habit, logs = [], onEdit, onDelete, onCheckIn }: Props = $props();
 
-	// Berechnete Werte
 	let frequencyText = $derived(formatFrequency(habit.frequency));
 	let currentStreak = $derived(calculateCurrentStreak(logs));
 	let totalExpected = $derived(
@@ -31,7 +30,6 @@
 	let totalCompleted = $derived(calculateTotalCompleted(logs));
 	let isCheckingIn = $state(false);
 
-	// Heutiges Log suchen
 	let todayLog = $derived.by(() => {
 		const today = getLocalDateString();
 		return logs.find((log) => log.logDate.split('T')[0] === today);
@@ -39,14 +37,12 @@
 
 	let isCompletedToday = $derived(todayLog !== undefined && todayLog.completed === true);
 
-	// Habit für heute abhaken/umschalten
 	async function handleCheckIn() {
 		isCheckingIn = true;
 		try {
 			const today = getLocalDateString();
 
 			if (todayLog) {
-				// Bestehendes Log aktualisieren (Toggle)
 				await updateHabitLog(todayLog.id, {
 					habitId: habit.id,
 					logDate: today,
@@ -54,7 +50,6 @@
 					notes: todayLog.notes || null
 				});
 			} else {
-				// Neues Log erstellen
 				await createHabitLog({
 					habitId: habit.id,
 					logDate: today,
@@ -89,7 +84,6 @@
 
 	<Card.Content class="flex flex-col items-center gap-3 py-6">
 		{#if totalExpected !== null}
-			<!-- Mit Enddatum: Zeige Fortschritt -->
 			<div class="flex items-center gap-2">
 				<span class="text-5xl font-bold">{totalCompleted}</span>
 				<span class="text-3xl text-muted-foreground">/</span>
@@ -97,7 +91,6 @@
 			</div>
 			<p class="text-sm text-muted-foreground">Erledigt</p>
 		{:else}
-			<!-- Ohne Enddatum: Zeige Streak -->
 			<div class="flex items-center gap-3">
 				<Flame class="h-10 w-10 text-orange-500" />
 				<span class="text-5xl font-bold">{currentStreak}</span>
@@ -120,7 +113,6 @@
 			{/if}
 		</div>
 
-		<!-- Check-In Button -->
 		<Button
 			variant={isCompletedToday ? 'default' : 'outline'}
 			onclick={handleCheckIn}

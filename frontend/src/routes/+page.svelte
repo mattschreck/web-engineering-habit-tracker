@@ -6,7 +6,6 @@
 	import ThemeToggle from '$lib/components/theme-toggle.svelte';
 	import { BackgroundBeams } from '$lib/components/ui/background-beams';
 
-	// Auto-redirect to dashboard if already logged in
 	onMount(() => {
 		if (isAuthenticated()) {
 			goto('/dashboard');
@@ -17,7 +16,6 @@
 <div class="relative min-h-screen overflow-hidden bg-background">
 	<BackgroundBeams />
 
-	<!-- Navigation -->
 	<nav class="relative z-10 border-b border-border">
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
@@ -33,7 +31,6 @@
 		</div>
 	</nav>
 
-	<!-- Hero Section -->
 	<main class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 		<div class="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center text-center">
 			<h2 class="mb-6 text-5xl font-bold text-foreground md:text-6xl lg:text-7xl">

@@ -1,6 +1,8 @@
 package com.example.habittracker.service
 
+import com.example.habittracker.dto.UpdateUserRequest
 import com.example.habittracker.entity.User
+import com.example.habittracker.exception.ResourceAlreadyExistsException
 import com.example.habittracker.repository.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -35,5 +37,21 @@ class UserService(
         } else {
             null
         }
+    }
+
+    fun updateCurrentUser(currentUser: User, request: UpdateUserRequest): User {
+        var updated = currentUser
+
+        request.username?.let { newUsername ->
+            if (newUsername != currentUser.username) {
+                val existingUser = userRepository.findByUsername(newUsername).orElse(null)
+                if (existingUser != null && existingUser.id != currentUser.id) {
+                    throw ResourceAlreadyExistsException("Username '$newUsername' is already taken")
+                }
+                updated = updated.copy(username = newUsername)
+            }
+        }
+
+        return userRepository.save(updated)
     }
 }

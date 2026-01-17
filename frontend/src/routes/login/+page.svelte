@@ -27,7 +27,6 @@
 			const response = await login(loginData);
 			console.log('Login successful:', response.message);
 
-			// Redirect to dashboard after successful login
 			goto('/dashboard');
 		} catch (err) {
 			if (err instanceof ApiError) {
@@ -58,7 +57,6 @@
 <div class="relative min-h-screen overflow-hidden bg-background">
 	<BackgroundBeams />
 
-	<!-- Navigation -->
 	<nav class="relative z-10 border-b border-border">
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
@@ -75,7 +73,6 @@
 		</div>
 	</nav>
 
-	<!-- Login Card Container -->
 	<div class="relative z-10 flex min-h-[calc(100vh-4rem)] w-full items-center justify-center p-4">
 		<Card.Root class="-my-4 w-full max-w-sm">
 			<Card.Header>
@@ -89,7 +86,6 @@
 			<Card.Content>
 				<form onsubmit={handleLogin}>
 					<div class="flex flex-col gap-6">
-						<!-- Username/Email Input -->
 						<div class="grid gap-2">
 							<Label for="usernameOrEmail">Username or Email</Label>
 							<Input
@@ -104,7 +100,6 @@
 							/>
 						</div>
 
-						<!-- Password Input -->
 						<div class="grid gap-2">
 							<div class="flex items-center justify-between">
 								<Label for="password">Password</Label>
@@ -121,7 +116,6 @@
 							/>
 						</div>
 
-						<!-- Error Message -->
 						{#if error}
 							<div class="rounded-md bg-red-50 p-3 text-sm text-red-500 dark:bg-red-950/20">
 								{error}

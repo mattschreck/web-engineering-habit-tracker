@@ -21,7 +21,6 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
-	// Dialog states
 	let showDialog = $state(false);
 	let editingHabit = $state<HabitResponse | null>(null);
 
@@ -33,14 +32,12 @@
 		loadHabits();
 	});
 
-	// Habits und Logs laden
 	async function loadHabits() {
 		try {
 			loading = true;
 			error = null;
 			habits = await getHabits();
 
-			// Logs der letzten 90 Tage laden (für alle Frequenzen)
 			const today = new Date();
 			const ninetyDaysAgo = new Date(today);
 			ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -79,7 +76,6 @@
 		showDialog = true;
 	}
 
-	// Habit löschen
 	async function handleDeleteClick(habit: HabitResponse) {
 		const confirmed = confirm(
 			`"${habit.name}" wirklich löschen? Alle zugehörigen Logs werden ebenfalls gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.`
@@ -115,7 +111,6 @@
 	<div class="relative z-10 min-h-screen">
 		<Navigation />
 
-		<!-- Hauptinhalt -->
 		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 			<div class="mb-8">
 				<h1 class="text-3xl font-bold text-foreground">Meine Habits</h1>
@@ -132,10 +127,8 @@
 				</div>
 			{:else}
 				<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					<!-- Neues Habit -->
 					<AddHabitCard onClick={handleAddHabit} />
 
-					<!-- Habit-Karten -->
 					{#each habits as habit (habit.id)}
 						<HabitCard
 							{habit}
@@ -159,5 +152,4 @@
 	</div>
 </div>
 
-<!-- Habit Dialog -->
 <HabitDialog bind:open={showDialog} habit={editingHabit} onSuccess={handleDialogSuccess} />

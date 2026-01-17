@@ -1,17 +1,7 @@
-/**
- * API Client for Habit Tracker Backend
- *
- * Provides type-safe HTTP client with JWT token management
- */
-
 import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
 
 const API_BASE_URL = env.PUBLIC_API_URL || 'http://localhost:8080';
-
-// ============================================
-// Types matching backend DTOs
-// ============================================
 
 export interface UserResponse {
 	id: number;
@@ -37,6 +27,10 @@ export interface RegisterRequest {
 export interface LoginRequest {
 	usernameOrEmail: string;
 	password: string;
+}
+
+export interface UpdateUserRequest {
+	username?: string;
 }
 
 export interface ErrorResponse {
@@ -88,10 +82,6 @@ export interface HabitLogRequest {
 	notes?: string | null;
 }
 
-// ============================================
-// Token & User Management
-// ============================================
-
 const TOKEN_KEY = 'jwt_token';
 const USER_KEY = 'current_user';
 
@@ -130,10 +120,6 @@ export function isAuthenticated(): boolean {
 	return getToken() !== null && getCurrentUserFromStorage() !== null;
 }
 
-// ============================================
-// HTTP Client
-// ============================================
-
 class ApiError extends Error {
 	constructor(
 		public status: number,
@@ -152,7 +138,6 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 		'Content-Type': 'application/json'
 	};
 
-	// Merge existing headers
 	if (options.headers) {
 		const existingHeaders = new Headers(options.headers);
 		existingHeaders.forEach((value, key) => {
@@ -160,7 +145,6 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 		});
 	}
 
-	// Add JWT token if available
 	const token = getToken();
 	if (token) {
 		headers['Authorization'] = `Bearer ${token}`;
@@ -171,19 +155,17 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 		headers
 	});
 
-	// Handle error responses
 	if (!response.ok) {
 		let errorDetails: ErrorResponse | undefined;
 		try {
 			errorDetails = await response.json();
 		} catch {
-			// If JSON parsing fails, create basic error
+			/* empty */
 		}
 
 		throw new ApiError(response.status, errorDetails?.message || response.statusText, errorDetails);
 	}
 
-	// Handle empty responses (204 No Content)
 	if (response.status === 204) {
 		return undefined as T;
 	}
@@ -191,17 +173,12 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 	return response.json();
 }
 
-// ============================================
-// Auth API
-// ============================================
-
 export async function register(data: RegisterRequest): Promise<AuthResponse> {
 	const response = await fetchApi<AuthResponse>('/api/auth/register', {
 		method: 'POST',
 		body: JSON.stringify(data)
 	});
 
-	// Store token and user after successful registration
 	setToken(response.token);
 	setCurrentUser(response.user);
 
@@ -214,7 +191,6 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
 		body: JSON.stringify(data)
 	});
 
-	// Store token and user after successful login
 	setToken(response.token);
 	setCurrentUser(response.user);
 
@@ -226,19 +202,20 @@ export function logout(): void {
 	clearCurrentUser();
 }
 
-// ============================================
-// User API
-// ============================================
-
 export async function getCurrentUser(): Promise<UserResponse> {
 	return fetchApi<UserResponse>('/api/users/me');
 }
 
-export async function updateCurrentUser(data: Partial<UserResponse>): Promise<UserResponse> {
-	return fetchApi<UserResponse>('/api/users/me', {
+export async function updateCurrentUser(data: UpdateUserRequest): Promise<UserResponse> {
+	const response = await fetchApi<AuthResponse>('/api/users/me', {
 		method: 'PUT',
 		body: JSON.stringify(data)
 	});
+
+	setToken(response.token);
+	setCurrentUser(response.user);
+
+	return response.user;
 }
 
 export async function deleteCurrentUser(): Promise<void> {
@@ -248,10 +225,6 @@ export async function deleteCurrentUser(): Promise<void> {
 	clearToken();
 	clearCurrentUser();
 }
-
-// ============================================
-// Habit API
-// ============================================
 
 export async function getHabits(): Promise<HabitResponse[]> {
 	const user = getCurrentUserFromStorage();
@@ -297,10 +270,6 @@ export async function deleteHabit(id: number): Promise<void> {
 	});
 }
 
-// ============================================
-// Habit Log API
-// ============================================
-
 export async function getHabitLogs(habitId: number): Promise<HabitLogResponse[]> {
 	return fetchApi<HabitLogResponse[]>(`/api/habit-logs?habitId=${habitId}`);
 }
@@ -342,5 +311,4 @@ export async function deleteHabitLog(logId: number): Promise<void> {
 	});
 }
 
-// Export ApiError for error handling
 export { ApiError };

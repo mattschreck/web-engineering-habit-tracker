@@ -29,18 +29,14 @@
 	let dialogTitle = $derived(isEdit ? 'Habit bearbeiten' : 'Neues Habit');
 	let submitButtonText = $derived(isEdit ? 'Aktualisieren' : 'Erstellen');
 
-	// Heutiges Datum (YYYY-MM-DD)
 	function getTodayDate(): string {
 		const today = new Date();
 		return today.toISOString().split('T')[0];
 	}
 
-	// Formular initialisieren/zurücksetzen
 	$effect(() => {
-		// Reagiert auf Änderungen von `open` und `habit`
 		if (open) {
 			if (habit) {
-				// Bearbeiten: Werte vom Habit laden
 				name = habit.name;
 				description = habit.description || '';
 				frequency = habit.frequency;
@@ -48,7 +44,6 @@
 				endDate = habit.endDate || '';
 				hasEndDate = !!habit.endDate;
 			} else {
-				// Neu erstellen: Formular zurücksetzen
 				name = '';
 				description = '';
 				frequency = 'DAILY';
@@ -60,7 +55,6 @@
 		}
 	});
 
-	// Formular absenden
 	async function handleSubmit(event?: Event) {
 		event?.preventDefault();
 		error = null;
@@ -102,7 +96,7 @@
 </script>
 
 <Dialog.Root bind:open>
-	<Dialog.Content class="sm:max-w-[425px]">
+	<Dialog.Content class="sm:max-w-106.25">
 		<Dialog.Header>
 			<Dialog.Title>{dialogTitle}</Dialog.Title>
 			<Dialog.Description>
@@ -111,7 +105,6 @@
 		</Dialog.Header>
 
 		<form onsubmit={handleSubmit} class="space-y-4">
-			<!-- Name -->
 			<div class="grid gap-2">
 				<Label for="name">Name *</Label>
 				<Input
@@ -127,7 +120,6 @@
 				/>
 			</div>
 
-			<!-- Beschreibung -->
 			<div class="grid gap-2">
 				<Label for="description">Beschreibung</Label>
 				<Input
@@ -142,7 +134,6 @@
 				/>
 			</div>
 
-			<!-- Frequency Select -->
 			<div class="grid gap-2">
 				<Label for="frequency">Frequenz *</Label>
 				<select
@@ -158,7 +149,6 @@
 				</select>
 			</div>
 
-			<!-- Startdatum -->
 			<div class="grid gap-2">
 				<Label for="startDate">Startdatum *</Label>
 				<Input
@@ -172,7 +162,6 @@
 				/>
 			</div>
 
-			<!-- Enddatum Checkbox -->
 			<div class="grid gap-2">
 				<div class="flex items-center gap-2">
 					<input
@@ -188,7 +177,6 @@
 				</div>
 			</div>
 
-			<!-- Enddatum (nur wenn aktiviert) -->
 			{#if hasEndDate}
 				<div class="grid gap-2">
 					<Label for="endDate">Enddatum *</Label>
@@ -204,14 +192,12 @@
 				</div>
 			{/if}
 
-			<!-- Error Message -->
 			{#if error}
 				<div class="rounded-md bg-red-50 p-3 text-sm text-red-500 dark:bg-red-950/20">
 					{error}
 				</div>
 			{/if}
 
-			<!-- Aktionen -->
 			<Dialog.Footer>
 				<Button type="button" variant="outline" onclick={handleCancel} disabled={loading}>
 					Abbrechen

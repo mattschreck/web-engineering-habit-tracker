@@ -55,3 +55,8 @@ data class AuthResponse(
     val user: UserResponse,
     val message: String = "Authentication successful"
 )
+
+data class UpdateUserRequest(
+    @field:Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    val username: String? = null
+)
